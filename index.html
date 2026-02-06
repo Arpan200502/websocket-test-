@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Chat</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-box {
+      width: 400px;
+      background: #020617;
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #334155;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .msg {
+      margin-bottom: 6px;
+      padding: 6px;
+      background: #1e293b;
+      border-radius: 4px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 4px;
+      border: none;
+      outline: none;
+      margin-right: 5px;
+      flex: 1;
+    }
+
+    button {
+      padding: 10px 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .input-row {
+      display: flex;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-box">
+    <div id="messages"></div>
+
+    <div class="input-row">
+      <input id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    console.log("✅ Script loaded", Date.now());
+
+  const socket = new WebSocket(
+    "wss://coming-rosana-wewew122-6d6bf3e7.koyeb.app/"
+  );
+
+  const messagesDiv = document.getElementById("messages");
+  const input = document.getElementById("messageInput");
+
+  socket.onopen = () => {
+    console.log("🟢 WebSocket connected");
+    addMessage("🟢 Connected to server");
+  };
+
+  socket.onerror = (err) => {
+    console.error("❌ WebSocket error", err);
+    addMessage("❌ Connection error");
+  };
+
+  socket.onclose = () => {
+    console.log("🔴 WebSocket closed");
+    addMessage("🔴 Disconnected");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("📩 Message:", event.data);
+    addMessage(event.data);
+  };
+
+  function sendMessage() {
+    if (socket.readyState !== WebSocket.OPEN) {
+      alert("Socket NOT connected");
+      return;
+    }
+    if (input.value.trim() === "") return;
+
+    socket.send(input.value);
+    input.value = "";
+  }
+
+  function addMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.innerText = text;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
+</body>
+</html>
